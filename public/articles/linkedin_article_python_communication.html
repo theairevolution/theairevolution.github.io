@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REST is the best communication strategy for your Python app — or is the only one you know?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --accent: #e8c547;
+    --accent2: #4fc3f7;
+    --accent3: #a78bfa;
+    --accent4: #f97316;
+    --accent5: #34d399;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --code-bg: #0a0c10;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+    font-weight: 300;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 48px 80px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 40%, rgba(232,197,71,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 80% at 10% 80%, rgba(79,195,247,0.05) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.3;
+  }
+
+  .hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1.08;
+    max-width: 900px;
+    position: relative;
+    margin-bottom: 32px;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    max-width: 600px;
+    color: var(--muted);
+    font-size: 17px;
+    font-weight: 400;
+    position: relative;
+    margin-bottom: 48px;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ARTICLE BODY */
+  .article {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+  }
+
+  .section {
+    margin-bottom: 80px;
+    animation: fadeIn 0.6s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-number::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 60px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin: 36px 0 14px;
+  }
+
+  p { margin-bottom: 18px; color: #c4cdd9; }
+
+  strong { color: var(--text); font-weight: 500; }
+
+  /* PROTOCOL CARDS */
+  .protocol-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 32px 0;
+  }
+
+  .protocol-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .protocol-card:hover { border-color: var(--accent); }
+
+  .protocol-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .protocol-card.rest::before { background: var(--accent); }
+  .protocol-card.ws::before { background: var(--accent2); }
+  .protocol-card.sse::before { background: var(--accent3); }
+  .protocol-card.stream::before { background: var(--accent4); }
+  .protocol-card.grpc::before { background: var(--accent5); }
+  .protocol-card.mq::before { background: #f472b6; }
+  .protocol-card.udp::before { background: #fb923c; }
+  .protocol-card.socket::before { background: #a3e635; }
+  .protocol-card.longpoll::before { background: #38bdf8; }
+
+  .protocol-card .card-icon { font-size: 1.5rem; margin-bottom: 10px; }
+  .protocol-card .card-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .protocol-card .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* CODE BLOCKS */
+  .code-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 24px 0;
+    font-size: 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-filename {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .code-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 20px 22px;
+    overflow-x: auto;
+    color: #abb2bf;
+  }
+
+  .kw { color: #c678dd; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .cm { color: #5c6370; font-style: italic; }
+  .num { color: #d19a66; }
+  .dec { color: var(--accent); }
+  .cls { color: #e5c07b; }
+  .var { color: #e06c75; }
+
+  /* DIAGRAMS */
+  .diagram-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px 24px;
+    margin: 28px 0;
+    overflow-x: auto;
+  }
+
+  .diagram-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(232,197,71,0.04);
+    padding: 18px 22px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .callout.blue { border-color: var(--accent2); background: rgba(79,195,247,0.04); }
+  .callout.purple { border-color: var(--accent3); background: rgba(167,139,250,0.04); }
+  .callout.green { border-color: var(--accent5); background: rgba(52,211,153,0.04); }
+
+  .callout-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout.blue .callout-title { color: var(--accent2); }
+  .callout.purple .callout-title { color: var(--accent3); }
+  .callout.green .callout-title { color: var(--accent5); }
+  .callout .callout-title { color: var(--accent); }
+
+  .callout p { color: #c4cdd9; font-size: 14px; margin: 0; }
+
+  /* COMPARISON TABLE */
+  .table-wrap { overflow-x: auto; margin: 28px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+  }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: #c4cdd9;
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .badge-green { background: rgba(52,211,153,0.12); color: var(--accent5); border: 1px solid rgba(52,211,153,0.2); }
+  .badge-yellow { background: rgba(232,197,71,0.12); color: var(--accent); border: 1px solid rgba(232,197,71,0.2); }
+  .badge-red { background: rgba(249,115,22,0.12); color: var(--accent4); border: 1px solid rgba(249,115,22,0.2); }
+  .badge-blue { background: rgba(79,195,247,0.12); color: var(--accent2); border: 1px solid rgba(79,195,247,0.2); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: var(--accent3); border: 1px solid rgba(167,139,250,0.2); }
+
+  /* SECTION DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 60px 0;
+    color: var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PROTOCOL DEEP-DIVE HEADER */
+  .protocol-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .protocol-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 2px;
+  }
+
+  .pb-rest { background: rgba(232,197,71,0.12); color: var(--accent); border: 1px solid rgba(232,197,71,0.2); }
+  .pb-ws { background: rgba(79,195,247,0.12); color: var(--accent2); border: 1px solid rgba(79,195,247,0.2); }
+  .pb-sse { background: rgba(167,139,250,0.12); color: var(--accent3); border: 1px solid rgba(167,139,250,0.2); }
+  .pb-stream { background: rgba(249,115,22,0.12); color: var(--accent4); border: 1px solid rgba(249,115,22,0.2); }
+  .pb-grpc { background: rgba(52,211,153,0.12); color: var(--accent5); border: 1px solid rgba(52,211,153,0.2); }
+  .pb-mq { background: rgba(244,114,182,0.12); color: #f472b6; border: 1px solid rgba(244,114,182,0.2); }
+  .pb-udp { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
+  .pb-socket { background: rgba(163,230,53,0.12); color: #a3e635; border: 1px solid rgba(163,230,53,0.2); }
+  .pb-longpoll { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+
+  /* CONCLUSION */
+  .conclusion {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px;
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conclusion::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3), var(--accent5));
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 60px 24px; }
+    .article { padding: 48px 24px 80px; }
+    h2 { font-size: 1.5rem; }
+    .protocol-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-label">// LinkedIn Technical Article · Python · Backend</div>
+  <h1 class="hero-title">REST is the best communication strategy for your Python app — <em>or is it the only one you know?</em></h1>
+  <p class="hero-subtitle">A practical deep-dive into 9 communication patterns every Python developer should have in their toolbox — with code examples, architectural diagrams, and honest trade-offs.</p>
+  <div class="hero-tags">
+    <span class="tag">Python</span>
+    <span class="tag">REST</span>
+    <span class="tag">WebSocket</span>
+    <span class="tag">gRPC</span>
+    <span class="tag">SSE</span>
+    <span class="tag">Message Queue</span>
+    <span class="tag">FastAPI</span>
+    <span class="tag">Distributed Systems</span>
+  </div>
+</section>
+
+<!-- ARTICLE BODY -->
+<article class="article">
+
+  <!-- INTRO -->
+  <section class="section">
+    <div class="section-number">00 · Introduction</div>
+    <h2>Most APIs are REST. Most problems aren't.</h2>
+    <p>Ask any Python developer how their service talks to the outside world and nine times out of ten you'll hear "REST". It's the default. The safe bet. The answer on every tutorial. And it's a great tool — don't get me wrong.</p>
+    <p>But <strong>REST is just one communication pattern</strong>, and the problem with defaults is that we stop asking whether they're the right choice. A hammer doesn't mean every problem is a nail, and an HTTP request-response cycle doesn't mean every data exchange is a synchronous fetch.</p>
+    <p>In this article I'll walk through 9 communication strategies available in Python, from the classics you already know to the patterns that will completely change how you architect your next system. Each one has a diagram, a working code example, and an honest breakdown of when to use it — and when not to.</p>
+
+    <div class="callout">
+      <div class="callout-title">🔗 Code Reference</div>
+      <p>The HTTP Streaming, SSE, and WebSocket examples are directly based on the <strong>communication_methods_python</strong> repo, built with FastAPI. The other patterns (gRPC, raw sockets, message queues, UDP, long polling) are original extensions following the same structure.</p>
+    </div>
+  </section>
+
+  <!-- OVERVIEW MAP -->
+  <section class="section">
+    <div class="section-number">01 · The Landscape</div>
+    <h2>Nine patterns, one map</h2>
+    <p>Before diving in, here's the full picture. Each pattern lives on a different point of the spectrum between <strong>simplicity</strong> and <strong>real-time capability</strong>.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// Communication patterns — spectrum overview</div>
+      <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;">
+        <!-- Axes -->
+        <line x1="40" y1="280" x2="740" y2="280" stroke="#252a38" stroke-width="1.5"/>
+        <line x1="40" y1="280" x2="40" y2="20" stroke="#252a38" stroke-width="1.5"/>
+        <!-- Axis labels -->
+        <text x="390" y="310" fill="#8892a4" font-size="10" text-anchor="middle" letter-spacing="2">LATENCY →  LOW ←——————————————→ HIGH</text>
+        <text x="14" y="150" fill="#8892a4" font-size="10" text-anchor="middle" transform="rotate(-90,14,150)" letter-spacing="1">REAL-TIME</text>
+        <!-- Grid lines -->
+        <line x1="40" y1="20" x2="740" y2="20" stroke="#1a1e28" stroke-width="1"/>
+        <line x1="40" y1="80" x2="740" y2="80" stroke="#1a1e28" stroke-width="1"/>
+        <line x1="40" y1="140" x2="740" y2="140" stroke="#1a1e28" stroke-width="1"/>
+        <line x1="40" y1="200" x2="740" y2="200" stroke="#1a1e28" stroke-width="1"/>
+
+        <!-- NODES: x = latency low→high, y = realtime high→low -->
+        <!-- Raw Socket: very low latency, very realtime -->
+        <circle cx="90" cy="40" r="28" fill="#0a0c10" stroke="#a3e635" stroke-width="1.5"/>
+        <text x="90" y="37" fill="#a3e635" font-size="9" text-anchor="middle" font-weight="600">RAW</text>
+        <text x="90" y="49" fill="#a3e635" font-size="9" text-anchor="middle" font-weight="600">SOCKET</text>
+
+        <!-- UDP: low lat, high realtime -->
+        <circle cx="160" cy="55" r="28" fill="#0a0c10" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="160" y="52" fill="#fb923c" font-size="9" text-anchor="middle" font-weight="600">UDP</text>
+        <text x="160" y="64" fill="#fb923c" font-size="8" text-anchor="middle">datagram</text>
+
+        <!-- gRPC: low lat, high throughput -->
+        <circle cx="240" cy="80" r="28" fill="#0a0c10" stroke="#34d399" stroke-width="1.5"/>
+        <text x="240" y="77" fill="#34d399" font-size="10" text-anchor="middle" font-weight="600">gRPC</text>
+        <text x="240" y="89" fill="#34d399" font-size="8" text-anchor="middle">HTTP/2</text>
+
+        <!-- WebSocket: low-mid lat, realtime -->
+        <circle cx="330" cy="60" r="28" fill="#0a0c10" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="330" y="57" fill="#4fc3f7" font-size="9" text-anchor="middle" font-weight="600">WEB</text>
+        <text x="330" y="69" fill="#4fc3f7" font-size="9" text-anchor="middle" font-weight="600">SOCKET</text>
+
+        <!-- HTTP Streaming -->
+        <circle cx="430" cy="100" r="28" fill="#0a0c10" stroke="#f97316" stroke-width="1.5"/>
+        <text x="430" y="97" fill="#f97316" font-size="9" text-anchor="middle" font-weight="600">HTTP</text>
+        <text x="430" y="109" fill="#f97316" font-size="9" text-anchor="middle" font-weight="600">STREAM</text>
+
+        <!-- SSE -->
+        <circle cx="510" cy="110" r="28" fill="#0a0c10" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="510" y="107" fill="#a78bfa" font-size="10" text-anchor="middle" font-weight="600">SSE</text>
+        <text x="510" y="119" fill="#a78bfa" font-size="8" text-anchor="middle">push</text>
+
+        <!-- Message Queue: mid-high lat -->
+        <circle cx="590" cy="155" r="28" fill="#0a0c10" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="590" y="152" fill="#f472b6" font-size="9" text-anchor="middle" font-weight="600">MSG</text>
+        <text x="590" y="164" fill="#f472b6" font-size="9" text-anchor="middle" font-weight="600">QUEUE</text>
+
+        <!-- Long Polling -->
+        <circle cx="660" cy="190" r="28" fill="#0a0c10" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="660" y="183" fill="#38bdf8" font-size="8" text-anchor="middle" font-weight="600">LONG</text>
+        <text x="660" y="195" fill="#38bdf8" font-size="8" text-anchor="middle" font-weight="600">POLL</text>
+
+        <!-- REST -->
+        <circle cx="710" cy="240" r="28" fill="#0a0c10" stroke="#e8c547" stroke-width="1.5"/>
+        <text x="710" y="237" fill="#e8c547" font-size="10" text-anchor="middle" font-weight="600">REST</text>
+        <text x="710" y="249" fill="#e8c547" font-size="8" text-anchor="middle">HTTP/1.1</text>
+
+        <!-- Dashed trend line -->
+        <path d="M90,40 L160,55 L240,80 L330,60 L430,100 L510,110 L590,155 L660,190 L710,240" fill="none" stroke="#252a38" stroke-width="1" stroke-dasharray="4,4"/>
+      </svg>
+    </div>
+
+    <div class="protocol-grid">
+      <div class="protocol-card rest">
+        <div class="card-icon">🌐</div>
+        <div class="card-name">REST / HTTP</div>
+        <div class="card-desc">The universal default. Stateless, cacheable, mature.</div>
+      </div>
+      <div class="protocol-card ws">
+        <div class="card-icon">⚡</div>
+        <div class="card-name">WebSocket</div>
+        <div class="card-desc">Full-duplex, persistent channel over TCP.</div>
+      </div>
+      <div class="protocol-card sse">
+        <div class="card-icon">📡</div>
+        <div class="card-name">SSE</div>
+        <div class="card-desc">One-way server push over long-lived HTTP.</div>
+      </div>
+      <div class="protocol-card stream">
+        <div class="card-icon">🌊</div>
+        <div class="card-name">HTTP Streaming</div>
+        <div class="card-desc">Chunked transfer for progressive delivery.</div>
+      </div>
+      <div class="protocol-card grpc">
+        <div class="card-icon">⚙️</div>
+        <div class="card-name">gRPC</div>
+        <div class="card-desc">Typed, high-performance RPC over HTTP/2.</div>
+      </div>
+      <div class="protocol-card mq">
+        <div class="card-icon">📬</div>
+        <div class="card-name">Message Queue</div>
+        <div class="card-desc">Decoupled async messaging with durability.</div>
+      </div>
+      <div class="protocol-card udp">
+        <div class="card-icon">💨</div>
+        <div class="card-name">UDP</div>
+        <div class="card-desc">Connectionless datagrams — fast, unreliable.</div>
+      </div>
+      <div class="protocol-card socket">
+        <div class="card-icon">🔌</div>
+        <div class="card-name">Raw Sockets</div>
+        <div class="card-desc">TCP at the OS level — maximum control.</div>
+      </div>
+      <div class="protocol-card longpoll">
+        <div class="card-icon">⏳</div>
+        <div class="card-name">Long Polling</div>
+        <div class="card-desc">HTTP held open until data is ready.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">— Deep Dives —</div>
+
+  <!-- ======================== REST ======================== -->
+  <section class="section">
+    <div class="section-number">02 · Pattern One</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">REST / HTTP</h2>
+      <span class="protocol-badge pb-rest">HTTP/1.1</span>
+    </div>
+
+    <p>REST (Representational State Transfer) is the architecture style that most of the web runs on. Each request carries all the context needed, the server processes it, and responds. Simple, stateless, and battle-tested.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// REST — Request / Response cycle</div>
+      <svg viewBox="0 0 680 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <rect x="20" y="40" width="140" height="50" rx="3" fill="#13161d" stroke="#e8c547" stroke-width="1.5"/>
+        <text x="90" y="62" fill="#e8c547" text-anchor="middle" font-size="11" font-weight="600">CLIENT</text>
+        <text x="90" y="78" fill="#8892a4" text-anchor="middle" font-size="9">browser / service</text>
+
+        <rect x="270" y="40" width="140" height="50" rx="3" fill="#13161d" stroke="#e8c547" stroke-width="1.5"/>
+        <text x="340" y="62" fill="#e8c547" text-anchor="middle" font-size="11" font-weight="600">SERVER</text>
+        <text x="340" y="78" fill="#8892a4" text-anchor="middle" font-size="9">FastAPI / Flask</text>
+
+        <rect x="520" y="40" width="140" height="50" rx="3" fill="#13161d" stroke="#252a38" stroke-width="1"/>
+        <text x="590" y="62" fill="#8892a4" text-anchor="middle" font-size="11">DATABASE</text>
+        <text x="590" y="78" fill="#5c6370" text-anchor="middle" font-size="9">Postgres / Redis</text>
+
+        <!-- Request arrow -->
+        <line x1="160" y1="58" x2="270" y2="58" stroke="#e8c547" stroke-width="1.5" marker-end="url(#arrow-y)"/>
+        <text x="215" y="50" fill="#e8c547" text-anchor="middle" font-size="9">GET /users/42</text>
+
+        <!-- Response arrow -->
+        <line x1="270" y1="72" x2="160" y2="72" stroke="#8892a4" stroke-width="1.5" marker-end="url(#arrow-g)"/>
+        <text x="215" y="88" fill="#8892a4" text-anchor="middle" font-size="9">200 OK  { json }</text>
+
+        <!-- DB arrow -->
+        <line x1="410" y1="65" x2="520" y2="65" stroke="#252a38" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-d)"/>
+
+        <defs>
+          <marker id="arrow-y" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#e8c547"/>
+          </marker>
+          <marker id="arrow-g" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#8892a4"/>
+          </marker>
+          <marker id="arrow-d" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#252a38"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>FastAPI REST Example</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">rest/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="cm"># In-memory store (replace with your DB of choice)</span>
+items: <span class="cls">dict</span> = {}
+
+<span class="kw">class</span> <span class="cls">Item</span>(BaseModel):
+    name: <span class="cls">str</span>
+    price: <span class="cls">float</span>
+
+<span class="dec">@app.get</span>(<span class="str">"/items/{item_id}"</span>)
+<span class="kw">async def</span> <span class="fn">get_item</span>(item_id: <span class="cls">int</span>):
+    <span class="kw">if</span> item_id <span class="kw">not in</span> items:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(status_code=<span class="num">404</span>, detail=<span class="str">"Not found"</span>)
+    <span class="kw">return</span> items[item_id]
+
+<span class="dec">@app.post</span>(<span class="str">"/items/{item_id}"</span>, status_code=<span class="num">201</span>)
+<span class="kw">async def</span> <span class="fn">create_item</span>(item_id: <span class="cls">int</span>, item: <span class="cls">Item</span>):
+    items[item_id] = item
+    <span class="kw">return</span> {<span class="str">"id"</span>: item_id, <span class="str">"item"</span>: item}</pre>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>CRUD APIs, public-facing endpoints, microservice-to-microservice calls where simplicity matters, anything that benefits from HTTP caching, mobile backends, third-party integrations.</p>
+    </div>
+    <div class="callout" style="border-color:#f97316;background:rgba(249,115,22,0.04)">
+      <div class="callout-title" style="color:#f97316">⚠️ When to Reconsider</div>
+      <p>When you need sub-100ms push notifications, bidirectional streaming, high-frequency updates (>10/sec), or decoupled async processing. REST will work — but it'll be inefficient.</p>
+    </div>
+  </section>
+
+  <!-- ======================== WEBSOCKET ======================== -->
+  <section class="section">
+    <div class="section-number">03 · Pattern Two</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">WebSocket</h2>
+      <span class="protocol-badge pb-ws">Full-Duplex TCP</span>
+    </div>
+
+    <p>WebSocket upgrades a regular HTTP connection into a persistent, bidirectional channel. Once the handshake is done, both the client and server can send messages to each other at any time with minimal overhead — no need to re-establish a connection per message.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// WebSocket — persistent bidirectional channel</div>
+      <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <rect x="20" y="70" width="120" height="60" rx="3" fill="#13161d" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="80" y="97" fill="#4fc3f7" text-anchor="middle" font-weight="600">CLIENT</text>
+        <text x="80" y="113" fill="#5c6370" text-anchor="middle" font-size="9">ws://</text>
+
+        <rect x="280" y="70" width="120" height="60" rx="3" fill="#13161d" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="340" y="97" fill="#4fc3f7" text-anchor="middle" font-weight="600">SERVER</text>
+        <text x="340" y="113" fill="#5c6370" text-anchor="middle" font-size="9">FastAPI WS</text>
+
+        <!-- Handshake -->
+        <line x1="140" y1="82" x2="280" y2="82" stroke="#8892a4" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#aw1)"/>
+        <text x="210" y="75" fill="#8892a4" text-anchor="middle" font-size="9">HTTP Upgrade</text>
+
+        <!-- Bidirectional arrows (persistent) -->
+        <line x1="140" y1="98" x2="280" y2="98" stroke="#4fc3f7" stroke-width="2" marker-end="url(#aw2)"/>
+        <text x="210" y="92" fill="#4fc3f7" text-anchor="middle" font-size="9">msg →</text>
+
+        <line x1="280" y1="112" x2="140" y2="112" stroke="#4fc3f7" stroke-width="2" marker-end="url(#aw3)"/>
+        <text x="210" y="128" fill="#4fc3f7" text-anchor="middle" font-size="9">← msg</text>
+
+        <!-- Persistent channel bar -->
+        <rect x="140" y="60" width="140" height="6" rx="2" fill="#4fc3f7" opacity="0.2"/>
+        <text x="210" y="55" fill="#4fc3f7" text-anchor="middle" font-size="9" letter-spacing="1">PERSISTENT CONNECTION</text>
+
+        <!-- Time axis -->
+        <line x1="30" y1="160" x2="30" y2="30" stroke="#252a38" stroke-width="1"/>
+        <text x="18" y="170" fill="#5c6370" font-size="8" transform="rotate(-90,18,170)" letter-spacing="1">TIME</text>
+
+        <defs>
+          <marker id="aw1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8892a4"/></marker>
+          <marker id="aw2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4fc3f7"/></marker>
+          <marker id="aw3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4fc3f7"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>FastAPI WebSocket Server</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">web_socket/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, WebSocket, WebSocketDisconnect
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="cm"># Track connected clients</span>
+connected_clients: <span class="cls">list</span>[WebSocket] = []
+
+<span class="dec">@app.websocket</span>(<span class="str">"/ws"</span>)
+<span class="kw">async def</span> <span class="fn">websocket_endpoint</span>(ws: <span class="cls">WebSocket</span>):
+    <span class="kw">await</span> ws.<span class="fn">accept</span>()
+    connected_clients.<span class="fn">append</span>(ws)
+    <span class="fn">print</span>(<span class="str">f"Client connected. Total: {len(connected_clients)}"</span>)
+
+    <span class="kw">try</span>:
+        <span class="kw">while</span> <span class="kw">True</span>:
+            data = <span class="kw">await</span> ws.<span class="fn">receive_text</span>()
+            <span class="cm"># Echo back + broadcast to all clients</span>
+            <span class="kw">for</span> client <span class="kw">in</span> connected_clients:
+                <span class="kw">await</span> client.<span class="fn">send_text</span>(<span class="str">f"[broadcast] {data}"</span>)
+    <span class="kw">except</span> WebSocketDisconnect:
+        connected_clients.<span class="fn">remove</span>(ws)
+        <span class="fn">print</span>(<span class="str">"Client disconnected"</span>)</pre>
+    </div>
+
+    <h3>Python WebSocket Client</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">web_socket/client.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio
+<span class="kw">import</span> websockets
+
+<span class="kw">async def</span> <span class="fn">run</span>():
+    <span class="kw">async with</span> websockets.<span class="fn">connect</span>(<span class="str">"ws://localhost:8002/ws"</span>) <span class="kw">as</span> ws:
+        <span class="kw">await</span> ws.<span class="fn">send</span>(<span class="str">"Hello from client!"</span>)
+        response = <span class="kw">await</span> ws.<span class="fn">recv</span>()
+        <span class="fn">print</span>(<span class="str">f"Received: {response}"</span>)
+
+asyncio.<span class="fn">run</span>(<span class="fn">run</span>())</pre>
+    </div>
+
+    <div class="callout blue">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>Real-time chat, collaborative editors (Google Docs style), live dashboards with bidirectional control, multiplayer games, financial trading UIs, pair programming tools.</p>
+    </div>
+  </section>
+
+  <!-- ======================== SSE ======================== -->
+  <section class="section">
+    <div class="section-number">04 · Pattern Three</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">Server-Sent Events (SSE)</h2>
+      <span class="protocol-badge pb-sse">HTTP Push</span>
+    </div>
+
+    <p>SSE is WebSocket's simpler cousin — a long-lived HTTP connection where <strong>only the server sends data</strong>. The client subscribes once and listens. It works over plain HTTP, auto-reconnects on failure, and is natively supported by browsers without any library.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// SSE — one-way server push</div>
+      <svg viewBox="0 0 680 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <rect x="20" y="55" width="120" height="50" rx="3" fill="#13161d" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="80" y="78" fill="#a78bfa" text-anchor="middle" font-weight="600">CLIENT</text>
+        <text x="80" y="93" fill="#5c6370" text-anchor="middle" font-size="9">EventSource</text>
+
+        <rect x="280" y="55" width="120" height="50" rx="3" fill="#13161d" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="340" y="78" fill="#a78bfa" text-anchor="middle" font-weight="600">SERVER</text>
+        <text x="340" y="93" fill="#5c6370" text-anchor="middle" font-size="9">EventSourceResponse</text>
+
+        <!-- Subscribe once -->
+        <line x1="140" y1="68" x2="280" y2="68" stroke="#8892a4" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#asse1)"/>
+        <text x="210" y="62" fill="#8892a4" text-anchor="middle" font-size="9">GET /events (subscribe)</text>
+
+        <!-- Server pushes -->
+        <line x1="280" y1="82" x2="140" y2="82" stroke="#a78bfa" stroke-width="2" marker-end="url(#asse2)"/>
+        <text x="210" y="76" fill="#a78bfa" text-anchor="middle" font-size="9">← event: data</text>
+
+        <line x1="280" y1="95" x2="140" y2="95" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#asse3)" stroke-dasharray="0"/>
+        <text x="210" y="108" fill="#a78bfa" text-anchor="middle" font-size="9">← event: data</text>
+
+        <!-- Server only label -->
+        <rect x="460" y="55" width="180" height="50" rx="3" fill="#13161d" stroke="#252a38" stroke-width="1"/>
+        <text x="550" y="78" fill="#5c6370" text-anchor="middle" font-size="10">server → client</text>
+        <text x="550" y="93" fill="#5c6370" text-anchor="middle" font-size="9">ONE-WAY ONLY</text>
+
+        <defs>
+          <marker id="asse1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8892a4"/></marker>
+          <marker id="asse2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a78bfa"/></marker>
+          <marker id="asse3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a78bfa"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>FastAPI SSE Server</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">sse/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> sse_starlette.sse <span class="kw">import</span> EventSourceResponse
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="kw">async def</span> <span class="fn">event_generator</span>():
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+        <span class="kw">yield</span> {
+            <span class="str">"event"</span>: <span class="str">"update"</span>,
+            <span class="str">"data"</span>: <span class="str">f"Server time tick #{i}"</span>,
+        }
+        <span class="kw">await</span> asyncio.<span class="fn">sleep</span>(<span class="num">1</span>)
+
+<span class="dec">@app.get</span>(<span class="str">"/events"</span>)
+<span class="kw">async def</span> <span class="fn">sse_endpoint</span>():
+    <span class="kw">return</span> <span class="fn">EventSourceResponse</span>(<span class="fn">event_generator</span>())</pre>
+    </div>
+
+    <div class="callout purple">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>Live notifications, activity feeds, CI/CD build logs, AI-generated text streaming (like ChatGPT responses!), stock tickers, sports scores — any scenario where the server continuously pushes data to the browser.</p>
+    </div>
+  </section>
+
+  <!-- ======================== HTTP STREAMING ======================== -->
+  <section class="section">
+    <div class="section-number">05 · Pattern Four</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">HTTP Streaming</h2>
+      <span class="protocol-badge pb-stream">Chunked Transfer</span>
+    </div>
+
+    <p>HTTP Streaming uses chunked transfer encoding to send a large response progressively, in parts. The server doesn't need to know the total size upfront — it writes chunks as they become available. Unlike SSE, this is a single response body being delivered in pieces, not a stream of events.</p>
+
+    <h3>FastAPI Streaming Response</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">stream_http/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> fastapi.responses <span class="kw">import</span> StreamingResponse
+
+app = <span class="fn">FastAPI</span>()
+
+<span class="kw">async def</span> <span class="fn">generate_large_content</span>():
+    <span class="cm"># Simulate an LLM or file being streamed token-by-token</span>
+    words = [<span class="str">"The "</span>, <span class="str">"quick "</span>, <span class="str">"brown "</span>, <span class="str">"fox "</span>, <span class="str">"jumps..."</span>]
+    <span class="kw">for</span> word <span class="kw">in</span> words:
+        <span class="kw">yield</span> word.encode()
+        <span class="kw">await</span> asyncio.<span class="fn">sleep</span>(<span class="num">0.3</span>)
+
+<span class="dec">@app.get</span>(<span class="str">"/stream"</span>)
+<span class="kw">async def</span> <span class="fn">stream_endpoint</span>():
+    <span class="kw">return</span> <span class="fn">StreamingResponse</span>(
+        <span class="fn">generate_large_content</span>(),
+        media_type=<span class="str">"text/plain"</span>
+    )</pre>
+    </div>
+
+    <div class="callout" style="border-color:#f97316;background:rgba(249,115,22,0.04)">
+      <div class="callout-title" style="color:#f97316">✅ Best Use Cases</div>
+      <p>LLM token streaming (OpenAI / Anthropic style), large file downloads, progressive image loading, report generation where results are computed and delivered incrementally.</p>
+    </div>
+  </section>
+
+  <!-- ======================== gRPC ======================== -->
+  <section class="section">
+    <div class="section-number">06 · Pattern Five</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">gRPC</h2>
+      <span class="protocol-badge pb-grpc">HTTP/2 + Protobuf</span>
+    </div>
+
+    <p>gRPC is Google's high-performance RPC framework. It uses <strong>Protocol Buffers</strong> for binary serialization (10x more compact than JSON) and HTTP/2 for multiplexed, low-latency transport. You define your service contract in a <code>.proto</code> file and gRPC generates client/server stubs.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// gRPC — contract-first service communication</div>
+      <svg viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <!-- Proto file in middle -->
+        <rect x="260" y="10" width="160" height="40" rx="3" fill="#13161d" stroke="#34d399" stroke-width="1.5"/>
+        <text x="340" y="27" fill="#34d399" text-anchor="middle" font-weight="600">service.proto</text>
+        <text x="340" y="41" fill="#5c6370" text-anchor="middle" font-size="9">contract definition</text>
+
+        <!-- Client -->
+        <rect x="30" y="80" width="140" height="60" rx="3" fill="#13161d" stroke="#34d399" stroke-width="1.5"/>
+        <text x="100" y="106" fill="#34d399" text-anchor="middle" font-weight="600">PYTHON CLIENT</text>
+        <text x="100" y="121" fill="#5c6370" text-anchor="middle" font-size="9">grpc stub (generated)</text>
+
+        <!-- Server -->
+        <rect x="510" y="80" width="140" height="60" rx="3" fill="#13161d" stroke="#34d399" stroke-width="1.5"/>
+        <text x="580" y="106" fill="#34d399" text-anchor="middle" font-weight="600">PYTHON SERVER</text>
+        <text x="580" y="121" fill="#5c6370" text-anchor="middle" font-size="9">grpc servicer</text>
+
+        <!-- Proto → Client -->
+        <line x1="260" y1="35" x2="170" y2="80" stroke="#252a38" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#agr1)"/>
+        <!-- Proto → Server -->
+        <line x1="420" y1="35" x2="510" y2="80" stroke="#252a38" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#agr2)"/>
+
+        <!-- Call -->
+        <line x1="170" y1="105" x2="510" y2="105" stroke="#34d399" stroke-width="2" marker-end="url(#agr3)"/>
+        <text x="340" y="99" fill="#34d399" text-anchor="middle" font-size="9">GetUser(req) → binary protobuf</text>
+
+        <!-- Response -->
+        <line x1="510" y1="120" x2="170" y2="120" stroke="#8892a4" stroke-width="1.5" marker-end="url(#agr4)"/>
+        <text x="340" y="135" fill="#8892a4" text-anchor="middle" font-size="9">← UserResponse (binary)</text>
+
+        <!-- Labels -->
+        <text x="340" y="165" fill="#5c6370" text-anchor="middle" font-size="9">HTTP/2 · multiplexed streams · binary serialization</text>
+
+        <defs>
+          <marker id="agr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#252a38"/></marker>
+          <marker id="agr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#252a38"/></marker>
+          <marker id="agr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#34d399"/></marker>
+          <marker id="agr4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8892a4"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>Proto Definition + Python Server</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">grpc/user.proto</span>
+        <span class="code-lang">Protobuf</span>
+      </div>
+      <pre><span class="kw">syntax</span> = <span class="str">"proto3"</span>;
+
+<span class="kw">service</span> <span class="cls">UserService</span> {
+  <span class="kw">rpc</span> <span class="fn">GetUser</span> (<span class="cls">UserRequest</span>) <span class="kw">returns</span> (<span class="cls">UserResponse</span>);
+  <span class="kw">rpc</span> <span class="fn">StreamUsers</span> (<span class="cls">UserRequest</span>) <span class="kw">returns</span> (<span class="kw">stream</span> <span class="cls">UserResponse</span>);
+}
+
+<span class="kw">message</span> <span class="cls">UserRequest</span> { <span class="cls">int32</span> id = <span class="num">1</span>; }
+<span class="kw">message</span> <span class="cls">UserResponse</span> {
+  <span class="cls">int32</span>  id    = <span class="num">1</span>;
+  <span class="cls">string</span> name  = <span class="num">2</span>;
+  <span class="cls">string</span> email = <span class="num">3</span>;
+}</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">grpc/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> grpc
+<span class="kw">from</span> concurrent <span class="kw">import</span> futures
+<span class="kw">import</span> user_pb2, user_pb2_grpc
+
+<span class="kw">class</span> <span class="cls">UserServicer</span>(user_pb2_grpc.<span class="cls">UserServiceServicer</span>):
+    <span class="kw">def</span> <span class="fn">GetUser</span>(self, request, context):
+        <span class="kw">return</span> user_pb2.<span class="cls">UserResponse</span>(
+            id=request.id,
+            name=<span class="str">f"User {request.id}"</span>,
+            email=<span class="str">f"user{request.id}@example.com"</span>
+        )
+
+    <span class="kw">def</span> <span class="fn">StreamUsers</span>(self, request, context):
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+            <span class="kw">yield</span> user_pb2.<span class="cls">UserResponse</span>(id=i, name=<span class="str">f"User {i}"</span>)
+
+server = grpc.<span class="fn">server</span>(futures.<span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">10</span>))
+user_pb2_grpc.<span class="fn">add_UserServiceServicer_to_server</span>(<span class="cls">UserServicer</span>(), server)
+server.<span class="fn">add_insecure_port</span>(<span class="str">"[::]:50051"</span>)
+server.<span class="fn">start</span>()
+server.<span class="fn">wait_for_termination</span>()</pre>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>Internal microservice communication (especially polyglot), high-throughput service meshes, mobile backends where bandwidth matters, bi-directional streaming between services, replacing REST in performance-critical internal APIs.</p>
+    </div>
+  </section>
+
+  <!-- ======================== MESSAGE QUEUE ======================== -->
+  <section class="section">
+    <div class="section-number">07 · Pattern Six</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">Message Queue</h2>
+      <span class="protocol-badge pb-mq">Async / Decoupled</span>
+    </div>
+
+    <p>Message queues are the backbone of resilient distributed systems. Instead of services calling each other directly, they publish messages to a broker (RabbitMQ, Kafka, SQS). Consumers process them independently — at their own pace, with retries, dead-letter queues, and durability guarantees.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// Message Queue — decoupled async pipeline</div>
+      <svg viewBox="0 0 680 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <!-- Producer -->
+        <rect x="20" y="60" width="130" height="50" rx="3" fill="#13161d" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="85" y="83" fill="#f472b6" text-anchor="middle" font-weight="600">PRODUCER</text>
+        <text x="85" y="98" fill="#5c6370" text-anchor="middle" font-size="9">order-service</text>
+
+        <!-- Broker -->
+        <rect x="245" y="50" width="190" height="70" rx="3" fill="#1a1e28" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="340" y="73" fill="#f472b6" text-anchor="middle" font-weight="600">BROKER</text>
+        <text x="340" y="88" fill="#5c6370" text-anchor="middle" font-size="9">RabbitMQ / Kafka / SQS</text>
+        <!-- Queue visualization -->
+        <rect x="268" y="98" width="30" height="14" rx="1" fill="#f472b6" opacity="0.3"/>
+        <rect x="304" y="98" width="30" height="14" rx="1" fill="#f472b6" opacity="0.5"/>
+        <rect x="340" y="98" width="30" height="14" rx="1" fill="#f472b6" opacity="0.7"/>
+        <rect x="376" y="98" width="30" height="14" rx="1" fill="#f472b6" opacity="0.9"/>
+        <text x="340" y="127" fill="#5c6370" text-anchor="middle" font-size="8">msgs →</text>
+
+        <!-- Consumers -->
+        <rect x="530" y="30" width="130" height="40" rx="3" fill="#13161d" stroke="#f472b6" stroke-width="1"/>
+        <text x="595" y="47" fill="#f472b6" text-anchor="middle" font-size="10" font-weight="600">CONSUMER A</text>
+        <text x="595" y="60" fill="#5c6370" text-anchor="middle" font-size="9">email-service</text>
+
+        <rect x="530" y="100" width="130" height="40" rx="3" fill="#13161d" stroke="#f472b6" stroke-width="1"/>
+        <text x="595" y="117" fill="#f472b6" text-anchor="middle" font-size="10" font-weight="600">CONSUMER B</text>
+        <text x="595" y="130" fill="#5c6370" text-anchor="middle" font-size="9">inventory-service</text>
+
+        <!-- Arrows -->
+        <line x1="150" y1="85" x2="245" y2="85" stroke="#f472b6" stroke-width="2" marker-end="url(#amq1)"/>
+        <text x="198" y="78" fill="#f472b6" text-anchor="middle" font-size="9">publish</text>
+
+        <line x1="435" y1="78" x2="530" y2="50" stroke="#f472b6" stroke-width="1.5" marker-end="url(#amq2)"/>
+        <line x1="435" y1="95" x2="530" y2="120" stroke="#f472b6" stroke-width="1.5" marker-end="url(#amq3)"/>
+        <text x="485" y="78" fill="#f472b6" text-anchor="middle" font-size="9">consume</text>
+
+        <defs>
+          <marker id="amq1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f472b6"/></marker>
+          <marker id="amq2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f472b6"/></marker>
+          <marker id="amq3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f472b6"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>Python with aio-pika (RabbitMQ)</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">message_queue/producer.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio, json
+<span class="kw">import</span> aio_pika
+
+<span class="kw">async def</span> <span class="fn">publish_order</span>(order: <span class="cls">dict</span>):
+    conn = <span class="kw">await</span> aio_pika.<span class="fn">connect_robust</span>(<span class="str">"amqp://guest:guest@localhost/"</span>)
+    <span class="kw">async with</span> conn:
+        channel = <span class="kw">await</span> conn.<span class="fn">channel</span>()
+        queue = <span class="kw">await</span> channel.<span class="fn">declare_queue</span>(<span class="str">"orders"</span>, durable=<span class="kw">True</span>)
+
+        <span class="kw">await</span> channel.<span class="fn">default_exchange</span>.<span class="fn">publish</span>(
+            aio_pika.<span class="cls">Message</span>(
+                body=json.<span class="fn">dumps</span>(order).<span class="fn">encode</span>(),
+                delivery_mode=aio_pika.<span class="cls">DeliveryMode</span>.PERSISTENT,
+            ),
+            routing_key=<span class="str">"orders"</span>,
+        )
+        <span class="fn">print</span>(<span class="str">f"Published: {order}"</span>)
+
+asyncio.<span class="fn">run</span>(<span class="fn">publish_order</span>({<span class="str">"id"</span>: <span class="num">42</span>, <span class="str">"item"</span>: <span class="str">"keyboard"</span>}))</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">message_queue/consumer.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">async def</span> <span class="fn">consume_orders</span>():
+    conn = <span class="kw">await</span> aio_pika.<span class="fn">connect_robust</span>(<span class="str">"amqp://guest:guest@localhost/"</span>)
+    <span class="kw">async with</span> conn:
+        channel = <span class="kw">await</span> conn.<span class="fn">channel</span>()
+        queue = <span class="kw">await</span> channel.<span class="fn">declare_queue</span>(<span class="str">"orders"</span>, durable=<span class="kw">True</span>)
+
+        <span class="kw">async with</span> queue.<span class="fn">iterator</span>() <span class="kw">as</span> msgs:
+            <span class="kw">async for</span> msg <span class="kw">in</span> msgs:
+                <span class="kw">async with</span> msg.<span class="fn">process</span>():
+                    order = json.<span class="fn">loads</span>(msg.body)
+                    <span class="fn">print</span>(<span class="str">f"Processing order: {order}"</span>)
+                    <span class="cm"># ... business logic ...</span>
+
+asyncio.<span class="fn">run</span>(<span class="fn">consume_orders</span>())</pre>
+    </div>
+
+    <div class="callout" style="border-color:#f472b6;background:rgba(244,114,182,0.04)">
+      <div class="callout-title" style="color:#f472b6">✅ Best Use Cases</div>
+      <p>E-commerce order processing, email/notification dispatch, background job processing, event-driven microservices, fan-out scenarios (one event, multiple consumers), any system that needs retry logic and durability guarantees.</p>
+    </div>
+  </section>
+
+  <!-- ======================== UDP ======================== -->
+  <section class="section">
+    <div class="section-number">08 · Pattern Seven</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">UDP (User Datagram Protocol)</h2>
+      <span class="protocol-badge pb-udp">Connectionless</span>
+    </div>
+
+    <p>UDP is the speed demon of the networking world. It sends packets without establishing a connection, without ordering them, and without confirming delivery. That's not a bug — it's a feature. When you need the absolute lowest latency and can tolerate some loss, UDP is unmatched.</p>
+
+    <h3>Python UDP Server & Client</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">udp/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> socket
+
+<span class="kw">def</span> <span class="fn">run_udp_server</span>(host=<span class="str">"0.0.0.0"</span>, port=<span class="num">9000</span>):
+    <span class="kw">with</span> socket.<span class="fn">socket</span>(socket.AF_INET, socket.SOCK_DGRAM) <span class="kw">as</span> sock:
+        sock.<span class="fn">bind</span>((host, port))
+        <span class="fn">print</span>(<span class="str">f"UDP server listening on {host}:{port}"</span>)
+
+        <span class="kw">while</span> <span class="kw">True</span>:
+            data, addr = sock.<span class="fn">recvfrom</span>(<span class="num">1024</span>)
+            <span class="fn">print</span>(<span class="str">f"[{addr}] {data.decode()}"</span>)
+            <span class="cm"># Fire-and-forget: no ACK, no guarantee</span>
+
+<span class="fn">run_udp_server</span>()</pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">udp/client.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> socket, time
+
+<span class="kw">def</span> <span class="fn">send_telemetry</span>():
+    <span class="kw">with</span> socket.<span class="fn">socket</span>(socket.AF_INET, socket.SOCK_DGRAM) <span class="kw">as</span> sock:
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">100</span>):
+            payload = <span class="str">f"sensor:{i},temp:{22.5+i*0.1:.1f}"</span>
+            sock.<span class="fn">sendto</span>(payload.<span class="fn">encode</span>(), (<span class="str">"127.0.0.1"</span>, <span class="num">9000</span>))
+            time.<span class="fn">sleep</span>(<span class="num">0.05</span>)  <span class="cm"># 20 packets/sec</span>
+
+<span class="fn">send_telemetry</span>()</pre>
+    </div>
+
+    <div class="callout" style="border-color:#fb923c;background:rgba(251,146,60,0.04)">
+      <div class="callout-title" style="color:#fb923c">✅ Best Use Cases</div>
+      <p>Online multiplayer games (position updates), video/audio streaming (VoIP, WebRTC internals), IoT sensor telemetry, DNS lookups, real-time monitoring where a dropped packet is acceptable.</p>
+    </div>
+  </section>
+
+  <!-- ======================== RAW SOCKETS ======================== -->
+  <section class="section">
+    <div class="section-number">09 · Pattern Eight</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">Raw TCP Sockets</h2>
+      <span class="protocol-badge pb-socket">TCP · OS Level</span>
+    </div>
+
+    <p>Raw TCP sockets give you maximum control. You define your own protocol over a persistent TCP connection — no HTTP overhead, no framework abstractions. You manage framing, serialization, and connection lifecycle yourself. It's the foundation that WebSocket, gRPC, and HTTP are all built on.</p>
+
+    <h3>Python asyncio TCP Server</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">raw_socket/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">handle_client</span>(reader: asyncio.<span class="cls">StreamReader</span>,
+                       writer: asyncio.<span class="cls">StreamWriter</span>):
+    addr = writer.<span class="fn">get_extra_info</span>(<span class="str">"peername"</span>)
+    <span class="fn">print</span>(<span class="str">f"Connection from {addr}"</span>)
+
+    <span class="kw">try</span>:
+        <span class="kw">while</span> <span class="kw">True</span>:
+            data = <span class="kw">await</span> reader.<span class="fn">read</span>(<span class="num">1024</span>)
+            <span class="kw">if not</span> data:
+                <span class="kw">break</span>
+            msg = data.<span class="fn">decode</span>().<span class="fn">strip</span>()
+            <span class="fn">print</span>(<span class="str">f"[{addr}] → {msg}"</span>)
+            writer.<span class="fn">write</span>(<span class="str">f"ACK: {msg}\n"</span>.<span class="fn">encode</span>())
+            <span class="kw">await</span> writer.<span class="fn">drain</span>()
+    <span class="kw">finally</span>:
+        writer.<span class="fn">close</span>()
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    server = <span class="kw">await</span> asyncio.<span class="fn">start_server</span>(<span class="fn">handle_client</span>, <span class="str">"0.0.0.0"</span>, <span class="num">8888</span>)
+    <span class="fn">print</span>(<span class="str">"Raw TCP server on :8888"</span>)
+    <span class="kw">async with</span> server:
+        <span class="kw">await</span> server.<span class="fn">serve_forever</span>()
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())</pre>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>Custom binary protocols, embedded systems, building your own protocol layer, proxy servers, high-frequency trading systems, game servers where every microsecond counts and HTTP overhead is not acceptable.</p>
+    </div>
+  </section>
+
+  <!-- ======================== LONG POLLING ======================== -->
+  <section class="section">
+    <div class="section-number">10 · Pattern Nine</div>
+    <div class="protocol-header">
+      <h2 style="margin:0">Long Polling</h2>
+      <span class="protocol-badge pb-longpoll">HTTP · Held Open</span>
+    </div>
+
+    <p>Long polling is the oldest trick for simulating server push over plain HTTP. The client makes a request and the server <strong>holds it open</strong> until data is available (or a timeout), then responds. The client immediately makes a new request and waits again. It's polling, but smarter.</p>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// Long Polling — held request → response → repeat</div>
+      <svg viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+        <rect x="30" y="70" width="120" height="60" rx="3" fill="#13161d" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="90" y="97" fill="#38bdf8" text-anchor="middle" font-weight="600">CLIENT</text>
+
+        <rect x="300" y="70" width="120" height="60" rx="3" fill="#13161d" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="360" y="97" fill="#38bdf8" text-anchor="middle" font-weight="600">SERVER</text>
+        <text x="360" y="112" fill="#5c6370" text-anchor="middle" font-size="9">waits for data</text>
+
+        <!-- Request 1 -->
+        <line x1="150" y1="82" x2="300" y2="82" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#alp1)"/>
+        <text x="225" y="75" fill="#38bdf8" text-anchor="middle" font-size="9">GET /poll  →</text>
+
+        <!-- Wait indicator -->
+        <rect x="300" y="88" width="4" height="14" rx="1" fill="#38bdf8" opacity="0.5"/>
+        <rect x="308" y="88" width="4" height="14" rx="1" fill="#38bdf8" opacity="0.3"/>
+        <rect x="316" y="88" width="4" height="14" rx="1" fill="#38bdf8" opacity="0.1"/>
+        <text x="370" y="88" fill="#5c6370" font-size="9">⏳ waiting...</text>
+
+        <!-- Response -->
+        <line x1="300" y1="110" x2="150" y2="110" stroke="#38bdf8" stroke-width="2" marker-end="url(#alp2)"/>
+        <text x="225" y="125" fill="#38bdf8" text-anchor="middle" font-size="9">← 200 { data ready }</text>
+
+        <!-- Repeat cycle label -->
+        <path d="M 90,130 C 90,155 90,165 90,165 L 360,165 C 360,165 360,155 360,130" fill="none" stroke="#252a38" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="225" y="178" fill="#5c6370" text-anchor="middle" font-size="9">client re-polls immediately</text>
+
+        <defs>
+          <marker id="alp1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/></marker>
+          <marker id="alp2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <h3>FastAPI Long Polling Endpoint</h3>
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-filename">long_polling/server.py</span>
+        <span class="code-lang">Python</span>
+      </div>
+      <pre><span class="kw">import</span> asyncio
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+
+app = <span class="fn">FastAPI</span>()
+pending_messages: <span class="cls">list</span> = []
+new_message_event = asyncio.<span class="fn">Event</span>()
+
+<span class="dec">@app.get</span>(<span class="str">"/poll"</span>)
+<span class="kw">async def</span> <span class="fn">long_poll</span>(timeout: <span class="cls">float</span> = <span class="num">30.0</span>):
+    <span class="kw">if</span> pending_messages:
+        <span class="kw">return</span> {<span class="str">"messages"</span>: pending_messages.<span class="fn">pop</span>(<span class="num">0</span>)}
+
+    <span class="kw">try</span>:
+        <span class="cm"># Block until a message arrives or timeout</span>
+        <span class="kw">await</span> asyncio.<span class="fn">wait_for</span>(new_message_event.<span class="fn">wait</span>(), timeout=timeout)
+        new_message_event.<span class="fn">clear</span>()
+        <span class="kw">return</span> {<span class="str">"messages"</span>: pending_messages.<span class="fn">pop</span>(<span class="num">0</span>)}
+    <span class="kw">except</span> asyncio.<span class="cls">TimeoutError</span>:
+        <span class="kw">return</span> {<span class="str">"messages"</span>: <span class="kw">None</span>}  <span class="cm"># client re-polls</span>
+
+<span class="dec">@app.post</span>(<span class="str">"/push"</span>)
+<span class="kw">async def</span> <span class="fn">push_message</span>(msg: <span class="cls">str</span>):
+    pending_messages.<span class="fn">append</span>(msg)
+    new_message_event.<span class="fn">set</span>()</pre>
+    </div>
+
+    <div class="callout blue">
+      <div class="callout-title">✅ Best Use Cases</div>
+      <p>Legacy environments where WebSocket is blocked by proxies/firewalls, chat systems that need to work everywhere, gradual migration path from polling to real-time. In modern systems, prefer SSE or WebSocket — long polling is the compatibility fallback.</p>
+    </div>
+  </section>
+
+  <div class="divider">— Decision Guide —</div>
+
+  <!-- COMPARISON TABLE -->
+  <section class="section">
+    <div class="section-number">11 · Comparison</div>
+    <h2>Which one should you pick?</h2>
+    <p>Here's the full comparison table to help you make an informed decision based on your actual requirements:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>Direction</th>
+            <th>Latency</th>
+            <th>Complexity</th>
+            <th>Reliability</th>
+            <th>Best For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:var(--accent)">REST</strong></td>
+            <td>req → res</td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-green">low</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>CRUD APIs, public endpoints</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent2)">WebSocket</strong></td>
+            <td>bidirectional</td>
+            <td><span class="badge badge-green">very low</span></td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td>Chat, games, collaboration</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent3)">SSE</strong></td>
+            <td>server → client</td>
+            <td><span class="badge badge-green">low</span></td>
+            <td><span class="badge badge-green">low</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>Feeds, notifications, AI output</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent4)">HTTP Stream</strong></td>
+            <td>server → client</td>
+            <td><span class="badge badge-green">low</span></td>
+            <td><span class="badge badge-green">low</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>File downloads, LLM tokens</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent5)">gRPC</strong></td>
+            <td>bidirectional</td>
+            <td><span class="badge badge-green">very low</span></td>
+            <td><span class="badge badge-red">high</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>Internal microservices</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#f472b6">Msg Queue</strong></td>
+            <td>async pub/sub</td>
+            <td><span class="badge badge-yellow">variable</span></td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-blue">very high</span></td>
+            <td>Background jobs, events</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#fb923c">UDP</strong></td>
+            <td>sender → receiver</td>
+            <td><span class="badge badge-green">ultra low</span></td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-red">low</span></td>
+            <td>Games, telemetry, VoIP</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#a3e635">Raw TCP</strong></td>
+            <td>bidirectional</td>
+            <td><span class="badge badge-green">ultra low</span></td>
+            <td><span class="badge badge-red">very high</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>Custom protocols, HFT</td>
+          </tr>
+          <tr>
+            <td><strong style="color:#38bdf8">Long Poll</strong></td>
+            <td>server → client</td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-yellow">medium</span></td>
+            <td><span class="badge badge-green">high</span></td>
+            <td>Legacy compat, fallback</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DECISION TREE -->
+  <section class="section">
+    <div class="section-number">12 · Decision Tree</div>
+    <h2>Not sure where to start? Use this flow.</h2>
+
+    <div class="diagram-wrap">
+      <div class="diagram-title">// Communication pattern decision tree</div>
+      <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:'IBM Plex Mono',monospace;font-size:10px;">
+
+        <!-- START -->
+        <rect x="280" y="10" width="160" height="38" rx="3" fill="#e8c547" />
+        <text x="360" y="28" fill="#0d0f14" text-anchor="middle" font-weight="600" font-size="11">New communication</text>
+        <text x="360" y="42" fill="#0d0f14" text-anchor="middle" font-size="9">requirement?</text>
+
+        <!-- Real-time? -->
+        <line x1="360" y1="48" x2="360" y2="78" stroke="#252a38" stroke-width="1.5" marker-end="url(#dt0)"/>
+        <rect x="255" y="78" width="210" height="34" rx="3" fill="#1a1e28" stroke="#8892a4" stroke-width="1"/>
+        <text x="360" y="97" fill="#e2e8f0" text-anchor="middle" font-size="10">Do you need real-time / push?</text>
+
+        <!-- YES → -->
+        <line x1="360" y1="112" x2="360" y2="142" stroke="#34d399" stroke-width="1.5" marker-end="url(#dt1)"/>
+        <text x="370" y="130" fill="#34d399" font-size="9">YES</text>
+
+        <!-- Bidirectional? -->
+        <rect x="255" y="142" width="210" height="34" rx="3" fill="#1a1e28" stroke="#8892a4" stroke-width="1"/>
+        <text x="360" y="162" fill="#e2e8f0" text-anchor="middle" font-size="10">Bidirectional data flow?</text>
+
+        <!-- YES → WebSocket -->
+        <line x1="360" y1="176" x2="360" y2="206" stroke="#4fc3f7" stroke-width="1.5" marker-end="url(#dt2)"/>
+        <text x="370" y="194" fill="#4fc3f7" font-size="9">YES</text>
+        <rect x="290" y="206" width="140" height="34" rx="3" fill="#13161d" stroke="#4fc3f7" stroke-width="1.5"/>
+        <text x="360" y="225" fill="#4fc3f7" text-anchor="middle" font-weight="600">WebSocket</text>
+        <text x="360" y="236" fill="#5c6370" text-anchor="middle" font-size="8">chat / games / collab</text>
+
+        <!-- NO (only server→client) → streaming? -->
+        <line x1="255" y1="159" x2="130" y2="159" stroke="#8892a4" stroke-width="1.5" marker-end="url(#dt3)"/>
+        <text x="190" y="154" fill="#8892a4" font-size="9">NO</text>
+
+        <!-- Large content? -->
+        <rect x="30" y="142" width="160" height="34" rx="3" fill="#1a1e28" stroke="#8892a4" stroke-width="1"/>
+        <text x="110" y="157" fill="#e2e8f0" text-anchor="middle" font-size="10">Streaming large</text>
+        <text x="110" y="169" fill="#e2e8f0" text-anchor="middle" font-size="10">content / LLM?</text>
+
+        <!-- YES → HTTP Stream -->
+        <line x1="110" y1="176" x2="110" y2="210" stroke="#f97316" stroke-width="1.5" marker-end="url(#dt4)"/>
+        <text x="120" y="196" fill="#f97316" font-size="9">YES</text>
+        <rect x="30" y="210" width="160" height="34" rx="3" fill="#13161d" stroke="#f97316" stroke-width="1.5"/>
+        <text x="110" y="229" fill="#f97316" text-anchor="middle" font-weight="600">HTTP Streaming</text>
+        <text x="110" y="240" fill="#5c6370" text-anchor="middle" font-size="8">files / tokens</text>
+
+        <!-- NO → SSE -->
+        <line x1="110" y1="210" x2="110" y2="260" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="0" marker-end="url(#dt5)"/>
+        <line x1="30" y1="176" x2="30" y2="270" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="30" y1="270" x2="50" y2="270" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#dt6)"/>
+        <text x="22" y="230" fill="#a78bfa" font-size="9" transform="rotate(-90,22,230)">NO</text>
+        <rect x="50" y="255" width="130" height="34" rx="3" fill="#13161d" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="115" y="274" fill="#a78bfa" text-anchor="middle" font-weight="600">SSE</text>
+        <text x="115" y="285" fill="#5c6370" text-anchor="middle" font-size="8">notifications / feeds</text>
+
+        <!-- NO to real-time → -->
+        <line x1="465" y1="95" x2="580" y2="95" stroke="#8892a4" stroke-width="1.5" marker-end="url(#dt7)"/>
+        <text x="520" y="89" fill="#8892a4" font-size="9">NO</text>
+
+        <!-- Internal high-perf? -->
+        <rect x="580" y="78" width="130" height="34" rx="3" fill="#1a1e28" stroke="#8892a4" stroke-width="1"/>
+        <text x="645" y="93" fill="#e2e8f0" text-anchor="middle" font-size="10">Internal service,</text>
+        <text x="645" y="105" fill="#e2e8f0" text-anchor="middle" font-size="10">high perf?</text>
+
+        <!-- YES → gRPC -->
+        <line x1="645" y1="112" x2="645" y2="142" stroke="#34d399" stroke-width="1.5" marker-end="url(#dt8)"/>
+        <text x="655" y="130" fill="#34d399" font-size="9">YES</text>
+        <rect x="575" y="142" width="130" height="34" rx="3" fill="#13161d" stroke="#34d399" stroke-width="1.5"/>
+        <text x="640" y="162" fill="#34d399" text-anchor="middle" font-weight="600">gRPC</text>
+        <text x="640" y="173" fill="#5c6370" text-anchor="middle" font-size="8">microservices</text>
+
+        <!-- NO → Decouple async? -->
+        <line x1="645" y1="176" x2="645" y2="210" stroke="#8892a4" stroke-width="1.5" marker-end="url(#dt9)"/>
+        <text x="655" y="196" fill="#8892a4" font-size="9">NO</text>
+        <rect x="565" y="210" width="155" height="34" rx="3" fill="#1a1e28" stroke="#8892a4" stroke-width="1"/>
+        <text x="643" y="225" fill="#e2e8f0" text-anchor="middle" font-size="10">Async + decouple</text>
+        <text x="643" y="237" fill="#e2e8f0" text-anchor="middle" font-size="10">needed?</text>
+
+        <!-- YES → MQ -->
+        <line x1="643" y1="244" x2="643" y2="274" stroke="#f472b6" stroke-width="1.5" marker-end="url(#dt10)"/>
+        <text x="653" y="262" fill="#f472b6" font-size="9">YES</text>
+        <rect x="568" y="274" width="150" height="34" rx="3" fill="#13161d" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="643" y="293" fill="#f472b6" text-anchor="middle" font-weight="600">Message Queue</text>
+        <text x="643" y="304" fill="#5c6370" text-anchor="middle" font-size="8">jobs / events</text>
+
+        <!-- NO → REST -->
+        <line x1="565" y1="227" x2="500" y2="227" stroke="#e8c547" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <line x1="500" y1="227" x2="500" y2="320" stroke="#e8c547" stroke-width="1.5"/>
+        <line x1="500" y1="320" x2="520" y2="320" stroke="#e8c547" stroke-width="1.5" marker-end="url(#dt11)"/>
+        <text x="490" y="220" fill="#e8c547" font-size="9">NO</text>
+        <rect x="520" y="306" width="130" height="34" rx="3" fill="#13161d" stroke="#e8c547" stroke-width="1.5"/>
+        <text x="585" y="325" fill="#e8c547" text-anchor="middle" font-weight="600">REST API</text>
+        <text x="585" y="336" fill="#5c6370" text-anchor="middle" font-size="8">default choice</text>
+
+        <defs>
+          <marker id="dt0" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#252a38"/></marker>
+          <marker id="dt1" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#34d399"/></marker>
+          <marker id="dt2" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#4fc3f7"/></marker>
+          <marker id="dt3" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#8892a4"/></marker>
+          <marker id="dt4" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#f97316"/></marker>
+          <marker id="dt5" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#a78bfa"/></marker>
+          <marker id="dt6" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#a78bfa"/></marker>
+          <marker id="dt7" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#8892a4"/></marker>
+          <marker id="dt8" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#34d399"/></marker>
+          <marker id="dt9" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#8892a4"/></marker>
+          <marker id="dt10" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#f472b6"/></marker>
+          <marker id="dt11" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#e8c547"/></marker>
+        </defs>
+      </svg>
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <section class="section">
+    <div class="conclusion">
+      <div class="section-number" style="margin-bottom:20px">13 · Final Thoughts</div>
+      <h2 style="margin-bottom:20px">The right tool changes everything</h2>
+      <p>Every communication pattern in this article solves a real problem. The mistake isn't using REST — it's using REST when the problem calls for something else, and not knowing you had other options.</p>
+      <p>The good news: Python has first-class support for all of them. FastAPI makes SSE, WebSocket, and HTTP Streaming almost trivial. The standard library gives you raw sockets and UDP. <code>grpcio</code>, <code>aio-pika</code>, and <code>confluent-kafka</code> cover the heavier protocols with mature libraries.</p>
+      <p>Next time you're architecting a feature, ask yourself: <strong>is this a request or an event? Does the client need to push or just receive? Do I need guarantees or just speed?</strong> The answer will point you straight to the right pattern.</p>
+      <p>The full reference code for HTTP Streaming, SSE, and WebSocket examples is available at <strong>github.com/theairevolution/communication_methods_python</strong> — built with FastAPI and ready to run with <code>uv sync</code>.</p>
+
+      <div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:10px;">
+        <span class="badge badge-yellow">Python</span>
+        <span class="badge badge-blue">FastAPI</span>
+        <span class="badge badge-green">WebSocket</span>
+        <span class="badge badge-purple">SSE</span>
+        <span class="badge badge-blue">gRPC</span>
+        <span class="badge badge-yellow">Distributed Systems</span>
+        <span class="badge badge-green">Backend</span>
+        <span class="badge badge-red">Performance</span>
+      </div>
+    </div>
+  </section>
+
+</article>
+
+</body>
+</html>

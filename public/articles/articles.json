@@ -1,0 +1,10 @@
+[
+  {
+    "slug": "python-communication",
+    "title": "REST is the best communication strategy for your Python app — or is the only one you know?",
+    "date": "2026-03-15",
+    "description": "A deep dive into Python communication protocols beyond REST: WebSockets, SSE, gRPC, message queues, and when to use each one.",
+    "tags": ["python", "api", "rest", "architecture"],
+    "file": "linkedin_article_python_communication.html"
+  }
+]
